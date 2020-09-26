@@ -185,13 +185,13 @@ main = void do
 
   where
   insertFilenames = foldr \x s -> maybe s (flip Set.insert s) x.filename
-  stdio = [ Just Child.Pipe, unsafePartial (Array.unsafeIndex Child.inherit 1), Just Child.Pipe ]
+  stdio = [ Just Child.Pipe, Just Child.Pipe, unsafePartial (Array.unsafeIndex Child.inherit 2) ]
   loadNothing _ _ = pure Nothing
 
   spawn' cmd args onExit = do
     child <- Child.spawn cmd args Child.defaultSpawnOptions { stdio = stdio }
     buffer <- Ref.new ""
-    Stream.onDataString (Child.stderr child) Encoding.UTF8 \chunk ->
+    Stream.onDataString (Child.stdout child) Encoding.UTF8 \chunk ->
       Ref.modify_ (_ <> chunk) buffer
     Child.onExit child \status ->
       case status of
